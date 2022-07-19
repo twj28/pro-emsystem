@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>员工管理系统</title>
+    <!-- import Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <!-- import axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!--引入jquery -->
+    <script th:src="@{/static/js/jquery-3.6.0.min.js}"></script>
+    <!--引入Bootstrap -->
+    <link rel="stylesheet" th:href="@{/static/bootstrap-3.4.1-dist/css/bootstrap.min.css}">
+    <script th:src="@{/static/bootstrap-3.4.1-dist/js/bootstrap.min.js}"></script>
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div>
+                    <h1>员工管理系统</h1>
+                </div>
+                <div class="col-md-offset-10">
+                    <button class="btn btn-primary">新增</button>
+                    <button class="btn btn-danger">删除</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <table class="table table-hover" id="emp_table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>empName</th>
+                        <th>email</th>
+                        <th>gender</th>
+                        <th>deptName</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(employeeList)}">暂无数据</tr>
+                <tr th:unless="${#lists .isEmpty(employeeList)}" th:each="employee:${employeeList}">
+                    <td th:text="${employee.empId}">1</td>
+                    <td th:text="${employee.empName}">tom</td>
+                    <td th:text="${employee.email}">email</td>
+                    <td th:text="${employee.gender =='M'?'男':'女'}">gender</td>
+                    <td th:text="${employee.department.deptName}">市场部</td>
+                    <td>
+                        <button class="btn btn-info">编辑</button>
+                        <button class="btn btn-danger">删除</button>
+                    </td>
+                </tr>
+                </tbody>
+
+            </table>
+        </div>
+        <div class="row">
+            <!--显示页码信息-->
+            <div class="col-md-offset-0" th:text="|当前第${pageInfo.pageNum}页，共有${pageInfo.pageSize}页，总计${pageInfo.total}条记录|">
+                当前第1页，共有34页，总计2000条记录
+            </div>
+            <!--分页信息-->
+            <div class="col-md-offset-7" id="nav_page">
+                <nav>
+                    <ul class="pagination">
+                        <li><a th:onclick="to_page(1)">首页</a></li>
+                        <!--上一页-->
+                        <li>
+                            <a th:if="${pageInfo.hasPreviousPage == true}" th:onclick="|to_page(${pageInfo.pageNum - 1})|" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <!--当前页码不是第一页，也不是最后一页，和倒数第二页-->
+                        <li th:if="${pageInfo.pageNum!=1&&pageInfo.pageNum!=pageInfo.pages&&pageInfo.pageNum!=pageInfo.pages-1}" th:each="page_num:${#numbers.sequence(pageInfo.pageNum - 2 > 0 ? pageInfo.pageNum -2:1,pageInfo.pageNum-1)}" >
+                            <a href="#" th:text="${page_num}" th:onclick="|to_page(${page_num})|" >1</a>
+                        </li>
+                        <!--当前页码是最后一页-->
+                        <li th:if="${pageInfo.pageNum==pageInfo.pages}" th:each="page_num:${#numbers.sequence(pageInfo.pageNum - 4,pageInfo.pageNum -1)}"  >
+                            <a th:text="${page_num}" th:onclick="|to_page(${page_num})|">1</a>
+                        </li>
+                        <!--当前页码是倒数第二页-->
+                        <li th:if="${pageInfo.pageNum==pageInfo.pages-1}" th:each="page_num:${#numbers.sequence(pageInfo.pageNum - 3,pageInfo.pageNum-1)}"  >
+                            <a th:text="${page_num}" th:onclick="|to_page(${page_num})|">1</a>
+                        </li>
+
+                        <!--显示当前页码-->
+                        <li class="active" >
+                            <a href="#" th:text="${pageInfo.pageNum}" >1</a>
+                        </li>
+
+                        <!--当前页等于1或者2时，页面显示5页码-->
+                        <li th:if="${pageInfo.pageNum==1||pageInfo.pageNum==2}" th:each="page_num:${#numbers.sequence(pageInfo.pageNum + 1,5)}"  >
+                            <a th:text="${page_num}" th:onclick="|to_page(${page_num})|">1</a>
+                        </li>
+
+                        <!--当前页大于2时且不是最后一页，页面显示5页码-->
+                        <li th:if="${pageInfo.pageNum!=pageInfo.pages&&pageInfo.pageNum>2}" th:each="page_num:${#numbers.sequence(pageInfo.pageNum + 1,pageInfo.pageNum + 2 < pageInfo.pages?pageInfo.pageNum + 2:pageInfo.pages)}"  >
+                            <a th:text="${page_num}" th:onclick="|to_page(${page_num})|">1</a>
+                        </li>
+
+                        <!--下页-->
+                        <li>
+                            <a th:if="${pageInfo.hasNextPage == true}" th:onclick="|to_page(${pageInfo.pageNum + 1})|" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li><a href="#" th:onclick="|to_page(${pageInfo.pages})|">尾页</a></li>
+                    </ul>
+                </nav>
+
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    /*let vue = new Vue({
+        el:"#nav_page",
+        data:{
+            pn:"",
+            classActive:""
+        },
+        methods:{
+            to_page1:function (pn){
+                window.location.href="index?pn="+pn;
+                vue.classActive="active";
+            }
+        }
+    });*/
+    function to_page(pn){
+        // alert(pn);
+        window.location.href="index?pn="+pn;
+
+    }
+
+</script>
+</body>
+</html>

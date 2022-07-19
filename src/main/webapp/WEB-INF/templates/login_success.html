@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>员工管理登录页面</title>
+    <style type="text/css">
+        h1 {
+            text-align: center;
+            margin-top: 200px;
+        }
+
+        h1 a {
+            color:red;
+        }
+    </style>
+    <!-- import Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <!-- import axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div id="header">
+    <img class="logo_img" alt="" th:src="@{/static/img/logo.jpg}" >
+    <div id="header_info">
+        <span>欢迎<span class="um_span" v-model="uname" style="color: #d58512;font-family: Arial">{{uname}}</span>进入</span>
+        <a th:href="@{/login}" style="color: red">注销</a>&nbsp;&nbsp;
+        <a th:href="@{/index}" style="color: red">返回</a>
+    </div>
+</div>
+
+<div id="main">
+
+    <h1>欢迎回来 <a th:href="@{/index}">转到主页</a></h1>
+
+</div>
+
+<div id="bottom">
+			<span>
+				沉心学.Copyright &copy;2022
+			</span>
+</div>
+<script>
+
+    let getUrl = window.location.href;
+    let getUname = getUrl.split("?")[1].split("=")[1];
+    // alert(getUname);
+
+    let vue = new Vue({
+        el:"#header_info",
+        data:{
+            uname:getUname
+        }
+    });
+
+
+
+
+</script>
+</body>
+</html>
